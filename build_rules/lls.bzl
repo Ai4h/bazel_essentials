@@ -1,4 +1,4 @@
-"""Repository rules for pulling liulishuo repositories."""
+"""Repository rules for pulling ai4h repositories."""
 
 load("@io_bazel_rules_go//go:def.bzl", "go_repository")
 
@@ -17,7 +17,7 @@ def _fetch_commit(ctx, remote, ref):
     return commit
   fail("%s: cannot find ref %s from repo %s" % (ctx.name, ref, remote))
 
-def _lls_repository_head_impl(ctx):
+def _ai4h_repository_head_impl(ctx):
   result = ctx.execute([
       ctx.path(ctx.attr._fetch_repo),
       "--dest", ctx.path(""),
@@ -29,8 +29,8 @@ def _lls_repository_head_impl(ctx):
   if result.return_code:
     fail("%s: failed to fetch from repo %s, err: %s" % (ctx.name, ctx.attr.remote, result.stderr))
 
-_lls_repository_head = repository_rule(
-    implementation = _lls_repository_head_impl,
+_ai4h_repository_head = repository_rule(
+    implementation = _ai4h_repository_head_impl,
     attrs = {
         "importpath": attr.string(mandatory = True),
         "remote": attr.string(mandatory = True),
@@ -46,16 +46,16 @@ _lls_repository_head = repository_rule(
     environ = ["BAZEL_RUNID"],
 )
 
-def lls_repository(name, path, commit=None, tag=None, use_local_version=0):
-  """A liulishuo repository.
+def ai4h_repository(name, path, commit=None, tag=None, use_local_version=0):
+  """A ai4h repository.
 
   If neither commit nor tag is specified, which should be the default case, then
   we pull the refs/heads/master from the repository for each build. This ensures
   that any internal change propagates to all the other repositories.
 
   name: (string) Name of the repository.
-  path: (string) Name relative to git.llsapp.com. E.g.,
-    git.llsapp.com/common/protos will have path name common/protos.
+  path: (string) Name relative to gitlab.aiminders.com. E.g.,
+    gitlab.aiminders.com/common/protos will have path name common/protos.
   commit: (string) Commit.
   tag: (string) Tag.
   use_local_version: (int) If 1, use the local mirror of the repository. This
@@ -66,14 +66,12 @@ def lls_repository(name, path, commit=None, tag=None, use_local_version=0):
         name = name,
         path = "../../" + path,
     )
-  importpath = "git.llsapp.com/" + path
-  remote = "git@git.llsapp.com:" + path + ".git"
+  importpath = "gitlab.aiminders.com/" + path
+  remote = "git@gitlab.aiminders.com:" + path + ".git"
   if commit or tag:
     # This is a temporary hack as only go_repository supports pulling code using
     # git@... protocol. Bazel only supports https, which happens to be not
     # supported by our gitlab: (.)
-    #
-    # TODO(yi.sun): Figure out a way to always pull the master head.
     return go_repository(
         name = name,
         importpath = importpath,
@@ -84,7 +82,7 @@ def lls_repository(name, path, commit=None, tag=None, use_local_version=0):
     )
 
   # No commit or tag specified, just pull from the master head.
-  return _lls_repository_head(
+  return _ai4h_repository_head(
       name = name,
       importpath = importpath,
       remote = remote,
