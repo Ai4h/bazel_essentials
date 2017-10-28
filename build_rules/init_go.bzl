@@ -1,5 +1,5 @@
 def init_go():
-  # NOTE(yi.sun): This is not the newest version of rules_go. However, we
+  # This is not the newest version of rules_go. However, we
   # have to stuck with this version as later commits do not allow using local
   # go installation, which becomes a problem in China as downloading 100M
   # go installation packages takes forever.
